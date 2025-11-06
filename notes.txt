@@ -1,0 +1,22 @@
+
+- follow user
+- check if already follow
+- unfollow user 
+- follow count 
+ 
+
+- arrow pagination
+
+- login input validation
+
+- global feed and your feed
+
+- tag
+
+- infinite scroll comments
+- delete comments
+
+- profile my articles
+- profile favorite articles
+
+- fix bug in posting comment
