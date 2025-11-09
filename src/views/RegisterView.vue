@@ -1,113 +1,233 @@
 <template>
-  <div class="flex items-center justify-center min-h-screen bg-gray-100">
-    <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
-      <div class="text-center">
-        <h1 class="text-2xl font-bold text-gray-900">Sign up</h1>
-        <p class="mt-2 text-sm text-gray-600">
-          <RouterLink to="/signin" class="text-blue-500 hover:underline"
-            >Have an account?</RouterLink
-          >
-        </p>
-      </div>
+  <div class="h-full bg-gray-50">
+    <div class="mx-auto max-w-md h-full px-4 md:px-6">
+      <div class="flex h-full items-center">
+        <div class="w-full rounded-lg border bg-white shadow-sm">
+          <!-- Header -->
+          <div class="px-6 pt-6 text-center">
+            <h1 class="text-xl font-semibold text-gray-900">Sign up</h1>
+            <p class="mt-1 text-sm text-gray-600">
+              Have an account?
+              <RouterLink
+                to="/signin"
+                class="font-medium text-blue-600 hover:underline"
+              >
+                Sign in
+              </RouterLink>
+            </p>
+          </div>
 
-      <!-- <ul class="mt-4 text-sm text-red-500">
-        <li>That email is already taken</li>
-      </ul> -->
+          <!-- Body -->
+          <div class="px-6 pb-6 pt-4">
+            <!-- Global error (API) -->
+            <div
+              v-if="globalError"
+              class="mb-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+              role="alert"
+            >
+              {{ globalError }}
+            </div>
 
-      <div class="space-y-6">
-        <input
-          v-model="userData.username"
-          class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          type="text"
-          placeholder="Username"
-        />
-        <span v-if="errors.username" class="text-red-500 text-sm">{{
-          errors.username
-        }}</span>
+            <form class="space-y-4" @submit.prevent="registerUser">
+              <!-- Username -->
+              <div class="space-y-1">
+                <label
+                  for="username"
+                  class="block text-sm font-medium text-gray-900"
+                >
+                  Username
+                </label>
+                <input
+                  id="username"
+                  v-model.trim="userData.username"
+                  type="text"
+                  autocomplete="username"
+                  required
+                  class="h-10 w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus-visible:ring-2 focus-visible:ring-blue-500"
+                  placeholder="yourusername"
+                />
+                <p v-if="errors.username" class="text-xs text-red-600">
+                  {{ errors.username }}
+                </p>
+              </div>
 
-        <input
-          v-model="userData.email"
-          class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          type="email"
-          placeholder="Email"
-        />
-        <span v-if="errors.email" class="text-red-500 text-sm">{{
-          errors.email
-        }}</span>
-        <input
-          v-model="userData.password"
-          class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          type="password"
-          placeholder="Password"
-        />
-        <span v-if="errors.password" class="text-red-500 text-sm">{{
-          errors.password
-        }}</span>
+              <!-- Email -->
+              <div class="space-y-1">
+                <label
+                  for="email"
+                  class="block text-sm font-medium text-gray-900"
+                >
+                  Email
+                </label>
+                <input
+                  id="email"
+                  v-model.trim="userData.email"
+                  type="email"
+                  inputmode="email"
+                  autocomplete="email"
+                  required
+                  class="h-10 w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus-visible:ring-2 focus-visible:ring-blue-500"
+                  placeholder="you@example.com"
+                />
+                <p v-if="errors.email" class="text-xs text-red-600">
+                  {{ errors.email }}
+                </p>
+              </div>
 
-        <button
-          @click="registerUser"
-          class="w-full px-4 py-2 font-bold text-white bg-blue-500 rounded-md hover:bg-blue-600"
-        >
-          Register
-        </button>
+              <!-- Password -->
+              <div class="space-y-1">
+                <label
+                  for="password"
+                  class="block text-sm font-medium text-gray-900"
+                >
+                  Password
+                </label>
+                <div class="relative">
+                  <input
+                    id="password"
+                    v-model="userData.password"
+                    :type="showPassword ? 'text' : 'password'"
+                    autocomplete="new-password"
+                    required
+                    class="h-10 w-full rounded-md border border-gray-300 bg-white px-3 pr-10 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus-visible:ring-2 focus-visible:ring-blue-500"
+                    placeholder="••••••••"
+                  />
+                  <!-- Eye toggle -->
+                  <button
+                    type="button"
+                    @click="showPassword = !showPassword"
+                    class="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700 focus-visible:outline-none"
+                    tabindex="-1"
+                    aria-label="Toggle password visibility"
+                  >
+                    <!-- Eye (visible) -->
+                    <svg
+                      v-if="showPassword"
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="h-5 w-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                      />
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                    </svg>
+                    <!-- Eye-off (hidden) -->
+                    <svg
+                      v-else
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="h-5 w-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M3.98 8.223A10.477 10.477 0 002.458 12C3.732 16.057 7.523 19 12 19c1.65 0 3.217-.363 4.617-1.016M21 21L3 3m10.5 7.5A3 3 0 009.88 9.88M12 5c4.477 0 8.268 2.943 9.542 7a10.478 10.478 0 01-1.758 3.088"
+                      />
+                    </svg>
+                  </button>
+                </div>
+                <p v-if="errors.password" class="text-xs text-red-600">
+                  {{ errors.password }}
+                </p>
+              </div>
+
+              <!-- Submit -->
+              <button
+                type="submit"
+                :disabled="loading"
+                class="inline-flex h-10 w-full items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700 focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <svg
+                  v-if="loading"
+                  class="mr-2 h-4 w-4 animate-spin"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <circle
+                    class="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                  />
+                  <path
+                    class="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v4A4 4 0 008 12H4z"
+                  />
+                </svg>
+                Register
+              </button>
+            </form>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div
-    v-if="toast"
-    id="toast-success"
-    class="absolute top-5 right-5 flex items-center w-full max-w-xs p-4 mb-4 text-gray-500 bg-white rounded-lg shadow dark:text-gray-400 dark:bg-gray-800"
-    role="alert"
-  >
+    <!-- Success toast -->
     <div
-      class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-green-500 bg-green-100 rounded-lg dark:bg-green-800 dark:text-green-200"
+      v-if="toast"
+      class="fixed top-4 right-4 z-50 flex w-full max-w-xs items-center gap-3 rounded-lg border border-green-200 bg-white px-3 py-2 text-sm text-gray-700 shadow"
+      role="status"
     >
-      <svg
-        class="w-5 h-5"
-        aria-hidden="true"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="currentColor"
-        viewBox="0 0 20 20"
+      <div
+        class="inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-green-100 text-green-600"
       >
-        <path
-          d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"
-        />
-      </svg>
-      <span class="sr-only">Check icon</span>
+        <svg
+          class="h-5 w-5"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+          aria-hidden="true"
+        >
+          <path
+            fill-rule="evenodd"
+            clip-rule="evenodd"
+            d="M10 18a8 8 0 100-16 8 8 0 000 16Zm3.707-9.293a1 1 0 10-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4Z"
+          />
+        </svg>
+      </div>
+      <div>Registered successfully.</div>
+      <button
+        type="button"
+        class="ml-auto inline-flex h-8 w-8 items-center justify-center rounded-md text-gray-400 hover:text-gray-700 hover:bg-gray-50"
+        @click="toast = false"
+        aria-label="Close"
+      >
+        <svg class="h-3 w-3" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <path
+            d="M1 1l12 12M13 1L1 13"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+          />
+        </svg>
+      </button>
     </div>
-    <div class="ms-3 text-sm font-normal">Registered successfully.</div>
-    <button
-      type="button"
-      class="ms-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8 dark:text-gray-500 dark:hover:text-white dark:bg-gray-800 dark:hover:bg-gray-700"
-      data-dismiss-target="#toast-success"
-      aria-label="Close"
-    >
-      <span class="sr-only">Close</span>
-      <svg
-        class="w-3 h-3"
-        aria-hidden="true"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 14 14"
-      >
-        <path
-          stroke="currentColor"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
-        />
-      </svg>
-    </button>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref } from "vue";
+import { RouterLink } from "vue-router";
 import apiClient from "@/services/AxiosInstance";
 
 const api = "/register";
+
 const userData = ref({
   username: "",
   email: "",
@@ -115,87 +235,69 @@ const userData = ref({
 });
 
 const errors = ref({});
-
+const globalError = ref("");
 const toast = ref(false);
+const loading = ref(false);
+const showPassword = ref(false);
 
 async function registerUser() {
-  if (validateFields()) {
-    // Submit form or perform registration logic
-    try {
-      const response = await apiClient.post(api, userData.value);
-      console.log("Response", response);
-
-      userData.value = {
-        username: "",
-        email: "",
-        password: "",
-      };
-      toast.value = true;
-
-      setTimeout(() => {
-        toast.value = false;
-      }, 3000);
-    } catch (error) {
-      console.log(error);
-      if (error.response.status === 422 && error.response.data.errors) {
-        if (error.response.data.errors.email) {
-          errors.value.email = error.response.data.errors.email[0];
-        }
-        if (error.response.data.errors.username) {
-          errors.value.username = error.response.data.errors.username[0];
-        }
-        if (error.response.data.errors.password) {
-          errors.value.password = error.response.data.errors.password[0];
-        }
-      }
+  globalError.value = "";
+  loading.value = true;
+  try {
+    if (!validateFields()) {
+      loading.value = false;
+      return;
     }
-  } else {
-    console.log("Validation failed.", errors.value);
-  }
 
-  console.log(userData.value);
+    const response = await apiClient.post(api, userData.value);
+    // console.log("Response", response);
+
+    userData.value = { username: "", email: "", password: "" };
+    toast.value = true;
+    setTimeout(() => {
+      toast.value = false;
+    }, 3000);
+  } catch (error) {
+    // Field-level errors from API
+    if (error?.response?.status === 422 && error?.response?.data?.errors) {
+      const e = error.response.data.errors;
+      errors.value = {
+        email: e.email?.[0] || "",
+        username: e.username?.[0] || "",
+        password: e.password?.[0] || "",
+      };
+    } else {
+      globalError.value =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Registration failed. Please try again.";
+    }
+  } finally {
+    loading.value = false;
+  }
 }
 
 function validateFields() {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-  errors.value = {};
+  const nextErrors = {};
 
   if (!userData.value.username) {
-    errors.value.username = "Username is required.";
+    nextErrors.username = "Username is required.";
   }
 
   if (!userData.value.email) {
-    errors.value.email = "Email is required.";
+    nextErrors.email = "Email is required.";
   } else if (!emailRegex.test(userData.value.email)) {
-    errors.value.email = "Invalid email address.";
+    nextErrors.email = "Invalid email address.";
   }
 
   if (!userData.value.password) {
-    errors.value.password = "Password is required.";
+    nextErrors.password = "Password is required.";
   } else if (userData.value.password.length < 8) {
-    errors.value.password = "Password must be at least 8 characters.";
+    nextErrors.password = "Password must be at least 8 characters.";
   }
 
-  // If there are no errors, return true
-  return Object.keys(errors.value).length === 0;
+  errors.value = nextErrors;
+  return Object.keys(nextErrors).length === 0;
 }
-
-//   const articleList = ref("list");
-
-//   async function getPostList() {
-//     try {
-//       const response = await axios.get(
-//         "http://bloggerist.test/api/articles/how-to-train-your-dragon-6KzHRzP3"
-//       );
-//       console.log(response);
-//     } catch (error) {
-//       console.error(error);
-//     }
-//   }
-
-//   onMounted(async () => {
-//     console.log("On mounted");
-//     getPostList();
-//   });
 </script>
