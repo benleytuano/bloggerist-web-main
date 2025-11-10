@@ -1,215 +1,332 @@
 <template>
-  <div v-if="isLoading">Loading...</div>
-  <div v-else class="article-page">
-    <div class="banner bg-[#3b82f6] text-white py-8">
-      <div class="container mx-auto px-4">
-        <h1 class="text-3xl font-bold">{{ articlesData.title }}</h1>
-
-        <div class="article-meta flex items-center mt-4 space-x-4">
-          <router-link to="/profile/eric-simons">
-            <img
-              v-if="articlesData.user.image"
-              :src="articlesData.user.profile_image_url"
-              alt=""
-              class="w-12 h-12 rounded-full"
-            />
-            <div
-              v-else
-              class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center font-bold text-white"
-            >
-              {{ capitalizeFirstLetter(articlesData.user.username[0]) }}
-            </div>
-          </router-link>
-          <div class="info flex flex-col">
-            <router-link
-              to="/profile/eric-simons"
-              class="author text-lg font-semibold"
-              >{{ articlesData.user.username }}</router-link
-            >
-            <span class="date text-gray-300">January 20th</span>
-          </div>
-          <div
-            v-if="articlesData && currentUser.id === articlesData.user_id"
-            class="flex space-x-2"
-          >
-            <!-- <button
-              class="btn btn-sm btn-outline-secondary border border-blue-400 px-4 py-2 rounded hover:bg-blue-600"
-            >
-              <i class="ion-edit"></i> Edit Article
-            </button> -->
-            <RouterLink
-              :to="`/edit-article/${articlesData.slug}`"
-              class="btn btn-sm btn-outline-secondary border border-blue-400 px-4 py-2 rounded hover:bg-blue-600"
-            >
-              <p>Edit Article</p>
-            </RouterLink>
-            <button
-              @click="deleteArticle"
-              class="btn btn-sm btn-outline-danger border border-red-500 px-4 py-2 rounded hover:bg-red-500 hover:text-white"
-            >
-              <i class="ion-trash-a"></i> Delete Article
-            </button>
-          </div>
-          <div v-else class="flex space-x-2">
-            <button
-              v-if="isFollowed"
-              class="btn btn-sm btn-outline-secondary border border-gray-300 px-4 py-2 rounded hover:bg-sky-500"
-              @click="unfollowUser"
-            >
-              <i class="ion-plus-round"></i>
-              <span class="ml-1"
-                >Unfollow {{ articlesData.user.username }}
-                <span class="counter text-gray-300">(10)</span></span
-              >
-            </button>
-
-            <button
-              v-else
-              class="btn btn-sm btn-outline-secondary border border-gray-300 px-4 py-2 rounded hover:bg-sky-500"
-              @click="followerUser"
-            >
-              <i class="ion-plus-round"></i>
-              <span class="ml-1"
-                >Follow {{ articlesData.user.username }}
-                <span class="counter text-gray-300">(10)</span></span
-              >
-            </button>
-            <button
-              v-if="isFavorite"
-              class="btn btn-sm btn-outline-primary border border-blue-300 px-4 py-2 rounded hover:bg-sky-500 hover:text-white"
-              @click="unfavoritePost"
-            >
-              <i class="ion-heart"></i>
-              <span class="ml-1"
-                >Unfavorite Post
-                <span class="counter text-gray-300">(29)</span></span
-              >
-            </button>
-            <button
-              v-else
-              class="btn btn-sm btn-outline-primary border border-blue-300 px-4 py-2 rounded hover:bg-sky-500 hover:text-white"
-              @click="favoritePost"
-            >
-              <i class="ion-heart"></i>
-              <span class="ml-1"
-                >Favorite Post
-                <span class="counter text-gray-300">(29)</span></span
-              >
-            </button>
-          </div>
-        </div>
-      </div>
+  <div>
+    <div v-if="isLoading" class="min-h-[40vh] flex items-center justify-center">
+      <div class="text-gray-500">Loading...</div>
     </div>
 
-    <div class="container mx-auto px-4 py-8">
-      <div class="article-content space-y-4">
-        <p class="">
-          {{ articlesData.description }}
-        </p>
-        <p class="text-gray-700">
-          {{ articlesData.body }}
-        </p>
-        <ul class="tag-list flex space-x-2">
-          <li class="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">
-            realworld
-          </li>
-          <li class="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">
-            implementations
-          </li>
-        </ul>
-      </div>
-
-      <hr class="my-8" />
-
-      <div class="comments-section">
-        <form
-          class="card comment-form bg-white shadow-md rounded-md p-4 space-y-4"
-          @submit.prevent="postComment"
-        >
-          <textarea
-            v-model="commentText"
-            class="form-control w-full border border-gray-300 rounded-md p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-            placeholder="Write a comment..."
-            rows="3"
-          ></textarea>
-          <div class="flex items-center justify-between">
-            <img
-              v-if="currentUser.image"
-              :src="currentUser.profile_image_url"
-              alt=""
-              class="w-12 h-12 rounded-full"
-            />
-            <div
-              v-else
-              class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center font-bold text-white"
-            >
-              {{ capitalizeFirstLetter(currentUser.username[0]) }}
-            </div>
-            <button
-              type="submit"
-              class="btn btn-primary bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-            >
-              Post Comment
-            </button>
-          </div>
-        </form>
-
-        <!-- Comments Card -->
-
-        <div
-          v-for="comment in commentsList"
-          class="card bg-white shadow-md rounded-md p-4 mt-4"
-        >
-          <p class="card-text text-gray-700">
-            {{ comment.body }}
-          </p>
-          <div
-            class="card-footer flex items-center justify-between mt-4 text-sm text-gray-500"
+    <div v-else class="bg-white">
+      <div class="max-w-3xl mx-auto px-4 md:px-6 py-8">
+        <!-- Title + description -->
+        <header class="mb-6">
+          <h1
+            class="text-3xl md:text-4xl font-extrabold leading-tight text-gray-900"
           >
-            <div class="flex items-center space-x-2">
-              <router-link to="/profile/author">
+            {{ articlesData.title }}
+          </h1>
+          <p v-if="articlesData.description" class="mt-3 text-gray-600">
+            {{ articlesData.description }}
+          </p>
+
+          <!-- author row with thin top & bottom border -->
+          <div
+            class="mt-6 border-t border-b border-gray-100 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4"
+          >
+            <div class="flex items-center gap-4">
+              <router-link
+                :to="`/profile/${articlesData.user?.username || ''}`"
+                class="flex items-center gap-3"
+              >
+                <div
+                  class="h-12 w-12 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center text-sm font-medium text-gray-700"
+                >
+                  <img
+                    v-if="articlesData.user?.profile_image_url"
+                    :src="articlesData.user.profile_image_url"
+                    alt="author"
+                    class="h-full w-full object-cover"
+                  />
+                  <span v-else>{{ authorInitial }}</span>
+                </div>
+
+                <div class="flex flex-col">
+                  <span class="text-sm font-medium text-gray-900">{{
+                    articlesData.user?.username || "Unknown"
+                  }}</span>
+                  <span class="text-xs text-gray-500">
+                    {{ formattedDate }} · {{ readMinutes }} min read
+                  </span>
+                </div>
+              </router-link>
+            </div>
+
+            <!-- Actions: creator kebab OR reader follow + favorite icon -->
+            <div class="flex items-center gap-3">
+              <!-- Creator: kebab menu -->
+              <div
+                v-if="articlesData && currentUser?.id === articlesData.user_id"
+                class="relative"
+                ref="kebabContainer"
+              >
+                <button
+                  @click="toggleCreatorMenu"
+                  aria-expanded="false"
+                  class="p-2 rounded-full hover:bg-gray-100"
+                >
+                  <!-- kebab icon -->
+                  <svg
+                    class="w-5 h-5 text-gray-600"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <circle cx="5" cy="12" r="1.8" />
+                    <circle cx="12" cy="12" r="1.8" />
+                    <circle cx="19" cy="12" r="1.8" />
+                  </svg>
+                </button>
+
+                <div
+                  v-if="creatorMenuOpen"
+                  ref="creatorMenu"
+                  class="absolute right-0 mt-2 w-40 bg-white border border-gray-100 rounded shadow-sm z-30"
+                >
+                  <RouterLink
+                    :to="`/edit-article/${articlesData.slug}`"
+                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                    >Edit</RouterLink
+                  >
+                  <button
+                    @click="onDeleteArticle"
+                    class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+
+              <!-- Reader controls -->
+              <div v-else class="flex items-center gap-3">
+                <button
+                  @click="isFollowed ? unfollowUser() : followerUser()"
+                  class="px-3 py-1.5 border rounded-full text-sm text-gray-700 hover:bg-sky-50"
+                >
+                  {{ isFollowed ? "Following" : "Follow" }}
+                </button>
+
+                <button
+                  @click="isFavorite ? unfavoritePost() : favoritePost()"
+                  class="relative inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-sm text-gray-700 hover:bg-sky-50"
+                  aria-label="Favorite"
+                >
+                  <!-- heart icon -->
+                  <svg
+                    class="w-4 h-4 text-red-500"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path
+                      d="M12 21s-7-4.5-9-8a5 5 0 0110-2 5 5 0 0110 2c-2 3.5-9 8-9 8z"
+                    />
+                  </svg>
+                  <span class="text-sm">{{
+                    articlesData?.favorited_by_users_count ?? 0
+                  }}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <!-- article body (markdown -> html) -->
+        <article class="prose lg:prose-lg max-w-none text-gray-800">
+          <div v-if="articlesData.body" v-html="renderedBody"></div>
+          <div v-else class="text-gray-700">
+            {{ articlesData.body }}
+          </div>
+
+          <!-- tags -->
+          <div v-if="articlesData.tagList?.length" class="mt-6">
+            <ul class="flex flex-wrap gap-2">
+              <li
+                v-for="(tag, idx) in articlesData.tagList"
+                :key="idx"
+                class="bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-700"
+              >
+                {{ tag }}
+              </li>
+            </ul>
+          </div>
+        </article>
+
+        <hr class="my-8" />
+
+        <!-- Comments -->
+        <section class="comments-section">
+          <!-- Composer header (avatar + name on top) with thin border top/bottom -->
+          <div class="mb-6 border-t border-b border-gray-100 py-4">
+            <div class="flex items-center gap-3 mb-3">
+              <div>
                 <img
-                  v-if="comment.user.image"
-                  :src="comment.user.profile_image_url"
-                  alt=""
-                  class="w-12 h-12 rounded-full"
+                  v-if="currentUser?.profile_image_url"
+                  :src="currentUser.profile_image_url"
+                  alt="avatar"
+                  class="w-10 h-10 rounded-full object-cover"
                 />
                 <div
                   v-else
-                  class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center font-bold text-white"
+                  class="w-10 h-10 rounded-full bg-green-600 flex items-center justify-center text-white font-medium"
                 >
-                  {{ capitalizeFirstLetter(comment.user.username[0]) }}
+                  {{ capitalizeFirstLetter(currentUser.username?.[0] || "U") }}
                 </div>
-              </router-link>
-              <router-link
-                to="/profile/jacob-schmidt"
-                class="comment-author font-semibold"
-                >{{ comment.user.username }}</router-link
-              >
+              </div>
+              <div>
+                <div class="text-sm font-semibold text-gray-900">
+                  {{ currentUser.username || "You" }}
+                </div>
+                <div class="text-xs text-gray-500">
+                  {{ readMinutes }} min read
+                </div>
+              </div>
             </div>
-            <div class="flex flex-row items-center gap-2">
-              <span class="date-posted">{{ comment.formatted_date }}</span>
-              <button
-                v-if="comment.user_id == currentUser.id"
-                @click="deleteComment(comment.id)"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke-width="1.5"
-                  stroke="currentColor"
-                  class="size-6 text-red-500"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
-                  />
-                </svg>
-              </button>
+
+            <div>
+              <div class="bg-gray-50 border border-gray-100 rounded-md p-4">
+                <textarea
+                  v-model="commentText"
+                  ref="commentRef"
+                  placeholder="What are your thoughts?"
+                  class="w-full min-h-[96px] bg-transparent placeholder-gray-400 resize-y outline-none text-gray-800"
+                ></textarea>
+
+                <div class="mt-3 flex items-center justify-between">
+                  <div class="flex items-center gap-3">
+                    <button
+                      @click="formatSelection('**')"
+                      type="button"
+                      class="text-sm font-semibold text-gray-700"
+                    >
+                      B
+                    </button>
+                    <button
+                      @click="formatSelection('*')"
+                      type="button"
+                      class="text-sm italic text-gray-700"
+                    >
+                      i
+                    </button>
+                  </div>
+
+                  <div class="flex items-center gap-3">
+                    <button
+                      v-if="commentText"
+                      @click="clearCommentForm"
+                      class="text-sm text-gray-600 hover:underline"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      :disabled="!commentText.trim()"
+                      @click="postComment"
+                      class="px-4 py-1.5 bg-blue-600 text-white rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Respond
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
+
+          <!-- Comments list -->
+          <div class="space-y-4">
+            <div
+              v-for="comment in commentsList"
+              :key="comment.id"
+              class="border-t pt-4"
+            >
+              <div class="flex gap-4">
+                <div>
+                  <router-link :to="`/profile/${comment.user?.username}`">
+                    <img
+                      v-if="comment.user?.profile_image_url"
+                      :src="comment.user.profile_image_url"
+                      alt=""
+                      class="w-10 h-10 rounded-full object-cover"
+                    />
+                    <div
+                      v-else
+                      class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium text-gray-700"
+                    >
+                      {{
+                        capitalizeFirstLetter(
+                          comment.user?.username?.[0] || "U"
+                        )
+                      }}
+                    </div>
+                  </router-link>
+                </div>
+
+                <div class="flex-1">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <router-link
+                        :to="`/profile/${comment.user?.username}`"
+                        class="font-semibold text-sm text-gray-900"
+                        >{{ comment.user?.username }}</router-link
+                      >
+                      <div class="text-xs text-gray-500">
+                        {{ comment.formatted_date }}
+                      </div>
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                      <button
+                        v-if="comment.user_id === currentUser.id"
+                        @click="deleteComment(comment.id)"
+                        class="text-red-500"
+                      >
+                        <!-- trash icon -->
+                        <svg
+                          class="w-4 h-4"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                        >
+                          <path
+                            d="M3 6h18M8 6v14a2 2 0 002 2h4a2 2 0 002-2V6M10 6V4a2 2 0 012-2h0a2 2 0 012 2v2"
+                            stroke-width="1.2"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+
+                  <p class="mt-2 text-gray-700 leading-relaxed">
+                    {{ comment.body }}
+                  </p>
+
+                  <div
+                    class="mt-3 flex items-center gap-4 text-sm text-gray-500"
+                  >
+                    <div class="flex items-center gap-1">
+                      <!-- clap placeholder -->
+                      <svg
+                        class="w-4 h-4"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                      >
+                        <path
+                          d="M12 21s-7-4.5-9-8a5 5 0 0110-2 5 5 0 0110 2c-2 3.5-9 8-9 8z"
+                          stroke-width="1.2"
+                        />
+                      </svg>
+                      <span>{{ comment.claps ?? 0 }}</span>
+                    </div>
+
+                    <button class="text-gray-500 hover:underline">Reply</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div v-if="!commentsList.length" class="text-gray-500">
+              No responses yet — be the first to respond.
+            </div>
+          </div>
+        </section>
+
+        <div v-if="page > 0" class="mt-6 text-center text-sm text-gray-500">
+          Showing {{ commentsList.length }} responses
         </div>
       </div>
     </div>
@@ -217,16 +334,18 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeMount } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 import { useRoute } from "vue-router";
 import apiClient from "@/services/AxiosInstance";
-import { isAuthenticated } from "@/services/auth.js";
 import Toast from "@/services/toast";
+import { marked } from "marked";
+import DOMPurify from "dompurify";
 
 const route = useRoute();
+
+/* data */
 const articlesData = ref({});
 const currentUser = ref({});
-
 const isLoading = ref(true);
 
 const commentText = ref("");
@@ -236,31 +355,51 @@ const page = ref(0);
 const isFollowed = ref(false);
 const isFavorite = ref(false);
 
+const creatorMenuOpen = ref(false);
+const kebabContainer = ref(null);
+const creatorMenu = ref(null);
+
+/* computed helpers */
+const authorInitial = computed(() => {
+  const username = articlesData.value?.user?.username || "";
+  return username ? username.charAt(0).toUpperCase() : "A";
+});
+
+const formattedDate = computed(() => {
+  const d = articlesData.value?.created_at;
+  if (!d) return "";
+  try {
+    const dt = new Date(d);
+    return dt.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  } catch {
+    return d;
+  }
+});
+
+const readMinutes = computed(() => {
+  const text = String(articlesData.value?.body || "");
+  const words = text.trim().split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.round(words / 200));
+});
+
+/* markdown -> sanitized html */
+const renderedBody = computed(() => {
+  try {
+    const md = articlesData.value?.body || "";
+    const html = marked.parse(md);
+    return DOMPurify.sanitize(html);
+  } catch {
+    return DOMPurify.sanitize(String(articlesData.value?.body || ""));
+  }
+});
+
+/* API calls (kept behavior) */
 async function getArticleData() {
-  console.log(route);
   try {
     const slug = route.params.slug;
     const response = await apiClient.get(`/articles/${slug}`);
-
-    console.log(response);
-
     if (response.status === 200 && response.data) {
       articlesData.value = response.data;
-    }
-  } catch (error) {
-    console.error(error);
-  }
-}
-
-async function getArticleComments() {
-  try {
-    const slug = route.params.slug;
-    const response = await apiClient.get(`/articles/${slug}/comments`);
-
-    console.log(response);
-
-    if (response.status === 200 && response.data) {
-      currentUser.value = response.data;
     }
   } catch (error) {
     console.error(error);
@@ -270,90 +409,22 @@ async function getArticleComments() {
 async function getCurrentUser() {
   try {
     const response = await apiClient.get(`/user`);
-
-    console.log(response);
-
     if (response.status === 200 && response.data) {
       currentUser.value = response.data;
     }
   } catch (error) {
     console.error(error);
-  }
-}
-
-async function deleteArticle() {
-  try {
-    const response = await apiClient.delete(
-      `/articles/${articlesData.value.slug}`
-    );
-
-    console.log(response);
-
-    if (response.status === 200 && response.data) {
-      currentUser.value = response.data;
-    }
-  } catch (error) {
-    console.error(error);
-  }
-}
-
-async function postComment() {
-  try {
-    const response = await apiClient.post(
-      `/articles/${articlesData.value.slug}/comments`,
-      {
-        body: commentText.value,
-      }
-    );
-    console.log(response);
-
-    if (response.status === 200) {
-      clearCommentForm();
-      await getCommentsList();
-      await Toast.fire({
-        icon: "success",
-        title: "Success",
-      });
-      // get the list of comments again
-    }
-  } catch (error) {
-    console.log(error);
-  }
-}
-
-async function deleteComment(commentId) {
-  try {
-    const res = await apiClient.delete(
-      `articles/${articlesData.value.slug}/comments/${commentId}`
-    );
-
-    console.log(res);
-    if (res.status === 200) {
-      page.value = 0;
-      commentsList.value = [];
-      await getCommentsList();
-      await Toast.fire({
-        icon: "error",
-        title: res.data.message,
-      });
-    }
-  } catch (error) {
-    console.log(error);
   }
 }
 
 async function getCommentsList() {
-  console.log(page.value);
   try {
     const nextPage = page.value + 1;
-
     const response = await apiClient.get(
       `/articles/${articlesData.value.slug}/comments?page=${nextPage}&limit=3`
     );
-
-    console.log(response);
     if (response.status === 200) {
-      if (response.data.data.length > 0) {
+      if (response.data.data?.length > 0) {
         commentsList.value = [...commentsList.value, ...response.data.data];
         page.value = nextPage;
       } else {
@@ -365,13 +436,63 @@ async function getCommentsList() {
   }
 }
 
+async function postComment() {
+  if (!commentText.value.trim()) return;
+  try {
+    const response = await apiClient.post(
+      `/articles/${articlesData.value.slug}/comments`,
+      { body: commentText.value }
+    );
+    if (response.status === 200) {
+      clearCommentForm();
+      commentsList.value = [];
+      page.value = 0;
+      await getCommentsList();
+      await Toast.fire({ icon: "success", title: "Posted" });
+    }
+  } catch (error) {
+    console.log(error);
+    await Toast.fire({ icon: "error", title: "Could not post comment" });
+  }
+}
+
+async function deleteComment(commentId) {
+  try {
+    const res = await apiClient.delete(
+      `articles/${articlesData.value.slug}/comments/${commentId}`
+    );
+    if (res.status === 200) {
+      commentsList.value = [];
+      page.value = 0;
+      await getCommentsList();
+      await Toast.fire({
+        icon: "success",
+        title: res.data.message || "Deleted",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+async function deleteArticle() {
+  try {
+    const res = await apiClient.delete(`/articles/${articlesData.value.slug}`);
+    if (res.status === 200) {
+      await Toast.fire({ icon: "success", title: "Article deleted" });
+      // Optionally navigate away
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+/* favorite / follow */
 async function favoritePost() {
   try {
     const response = await apiClient.post(
       `articles/${articlesData.value.slug}/favorite`
     );
-
-    console.log(response);
     if (response.status === 200) {
       await checkIsFavorite();
     }
@@ -385,8 +506,6 @@ async function unfavoritePost() {
     const response = await apiClient.delete(
       `articles/${articlesData.value.slug}/favorite`
     );
-
-    console.log(response);
     if (response.status === 200) {
       await checkIsFavorite();
     }
@@ -400,9 +519,6 @@ async function checkIsFavorite() {
     const res = await apiClient.get(
       `articles/${articlesData.value.slug}/isFavorite`
     );
-
-    console.log(res);
-
     if (res.status === 200) {
       isFavorite.value = res.data.isFavorite;
     }
@@ -416,8 +532,6 @@ async function followerUser() {
     const response = await apiClient.post(
       `profiles/${articlesData.value.user.username}/follow`
     );
-    console.log(response);
-
     if (response.status === 200) {
       await checkIsFollowed();
     }
@@ -431,8 +545,6 @@ async function unfollowUser() {
     const response = await apiClient.delete(
       `profiles/${articlesData.value.user.username}/follow`
     );
-    console.log(response);
-
     if (response.status === 200) {
       await checkIsFollowed();
     }
@@ -446,9 +558,6 @@ async function checkIsFollowed() {
     const response = await apiClient.get(
       `/profiles/${articlesData.value.user.id}/checkIsFollowed`
     );
-
-    console.log(response);
-
     if (response.status === 200) {
       isFollowed.value = response.data.isFollowed;
     }
@@ -457,26 +566,79 @@ async function checkIsFollowed() {
   }
 }
 
-//Helper function
-
-//Text
-
-function capitalizeFirstLetter(text) {
-  return text.charAt(0).toUpperCase() + text.slice(1);
+/* helpers */
+function capitalizeFirstLetter(text = "") {
+  return text ? text.charAt(0).toUpperCase() + text.slice(1) : "";
 }
-
 function clearCommentForm() {
   commentText.value = "";
 }
 
-function debounce(func, delay) {
-  let timeoutId;
+/* formatting helper for composer (insert markdown bold/italic) */
+function formatSelection(marker) {
+  const el =
+    document.querySelector("textarea[ref='commentRef']") ||
+    document.querySelector("textarea");
+  const start = el?.selectionStart ?? null;
+  const end = el?.selectionEnd ?? null;
+  if (start === null) {
+    commentText.value = marker + marker + commentText.value;
+    return;
+  }
+  const before = commentText.value.slice(0, start);
+  const selected = commentText.value.slice(start, end);
+  const after = commentText.value.slice(end);
+  if (selected.startsWith(marker) && selected.endsWith(marker)) {
+    const unwrapped = selected.slice(
+      marker.length,
+      selected.length - marker.length
+    );
+    commentText.value = before + unwrapped + after;
+    setTimeout(() => {
+      if (el) el.selectionStart = before.length;
+    }, 0);
+    return;
+  }
+  commentText.value = before + marker + selected + marker + after;
+  setTimeout(() => {
+    if (el) {
+      el.selectionStart = start + marker.length;
+      el.selectionEnd = end + marker.length;
+      el.focus();
+    }
+  }, 0);
+}
 
+/* kebab menu behavior: toggle + close on outside click / ESC */
+function toggleCreatorMenu() {
+  creatorMenuOpen.value = !creatorMenuOpen.value;
+}
+function closeCreatorMenu() {
+  creatorMenuOpen.value = false;
+}
+
+function handleDocumentClick(e) {
+  const menuEl = creatorMenu.value;
+  const container = kebabContainer.value;
+  if (!menuEl || !container) return;
+  if (menuEl.contains(e.target) || container.contains(e.target)) {
+    // clicked inside - do nothing
+    return;
+  }
+  // clicked outside
+  closeCreatorMenu();
+}
+
+function handleKeyDown(e) {
+  if (e.key === "Escape") closeCreatorMenu();
+}
+
+/* infinite scroll debounce */
+function debounce(fn, delay) {
+  let timeoutId;
   return function (...args) {
     clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => {
-      func.apply(this, args);
-    }, delay);
+    timeoutId = setTimeout(() => fn.apply(this, args), delay);
   };
 }
 
@@ -486,34 +648,35 @@ const handleScroll = debounce(async () => {
     document.documentElement.scrollHeight - 200;
   if (bottom) {
     await getCommentsList();
-    // setPage((prevPage) => {
-    //   const nextPage = prevPage + 1;
-    //   fetchData(nextPage);
-    //   return nextPage;
-    // });
   }
 }, 400);
 
+/* lifecycle */
 onMounted(async () => {
   await getArticleData();
-  await getArticleComments();
   await getCurrentUser();
   await getCommentsList();
   await checkIsFavorite();
   await checkIsFollowed();
+
   isLoading.value = false;
 
-  console.log(articlesData.value);
-
   window.addEventListener("scroll", handleScroll);
+  document.addEventListener("click", handleDocumentClick);
+  document.addEventListener("keydown", handleKeyDown);
+});
 
-  // await getArticleComments();
-  // await getCurrentUser();
+onBeforeUnmount(() => {
+  window.removeEventListener("scroll", handleScroll);
+  document.removeEventListener("click", handleDocumentClick);
+  document.removeEventListener("keydown", handleKeyDown);
 });
 </script>
 
 <style scoped>
-.container {
-  max-width: 800px;
+/* small tweaks */
+.prose img {
+  border-radius: 8px;
+  margin: 0.75rem 0;
 }
 </style>
