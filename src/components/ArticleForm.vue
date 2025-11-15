@@ -165,6 +165,8 @@ const props = defineProps({
     default: () => ({ title: "", description: "", body: "", tagString: "" }),
   },
   buttonText: { type: String, default: "Publish Article" },
+  isEditing: { type: Boolean, default: false },
+  articleSlug: { type: String, default: null },
 });
 
 const emit = defineEmits(["created", "error"]);
@@ -271,7 +273,7 @@ function togglePreview() {
   showPreview.value = !showPreview.value;
 }
 
-// submit: post to /articles
+// submit: post to /articles or put to /articles/{slug}
 async function submit() {
   if (!validate()) return;
   loading.value = true;
@@ -282,7 +284,14 @@ async function submit() {
       body: form.body,
       // tags not submitted yet per requirement
     };
-    const res = await apiClient.post("/articles", payload);
+
+    // Use PUT if editing, POST if creating
+    const method = props.isEditing ? "put" : "post";
+    const url = props.isEditing
+      ? `/articles/${props.articleSlug}`
+      : "/articles";
+
+    const res = await apiClient[method](url, payload);
     if (res && res.status >= 200 && res.status < 300) {
       emit("created", res.data);
       resetForm();
