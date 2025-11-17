@@ -336,12 +336,15 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 import { useRoute } from "vue-router";
+import { useRouter } from "vue-router";
 import apiClient from "@/services/AxiosInstance";
 import Toast from "@/services/toast";
+import Swal from "sweetalert2";
 import { marked } from "marked";
 import DOMPurify from "dompurify";
 
 const route = useRoute();
+const router = useRouter();
 
 /* data */
 const articlesData = ref({});
@@ -607,6 +610,76 @@ function formatSelection(marker) {
       el.focus();
     }
   }, 0);
+}
+
+async function onDeleteArticle() {
+  // Show clean, minimalist confirmation dialog
+  const result = await Swal.fire({
+    text: "Delete this article? This action cannot be undone.",
+    showCancelButton: true,
+    confirmButtonColor: "#dc2626",
+    cancelButtonColor: "#e5e7eb",
+    confirmButtonText: "Delete",
+    cancelButtonText: "Cancel",
+    buttonsStyling: true,
+    reverseButtons: true,
+    customClass: {
+      popup: "rounded-lg shadow-lg",
+      confirmButton: "px-4 py-2 text-sm font-medium rounded-md",
+      cancelButton: "px-4 py-2 text-sm font-medium text-gray-700 rounded-md",
+    },
+    // No timer, no icon, clean and minimal
+    showClass: {
+      popup: "swal2-show",
+      backdrop: "swal2-backdrop-show",
+    },
+    hideClass: {
+      popup: "swal2-hide",
+      backdrop: "swal2-backdrop-hide",
+    },
+  });
+
+  // If user cancels, exit early
+  if (!result.isConfirmed) return;
+
+  try {
+    const response = await apiClient.delete(
+      `/articles/${articlesData.value.slug}`
+    );
+
+    if (response.status === 200) {
+      await Toast.fire({
+        icon: "success",
+        title: "Article deleted",
+      });
+
+      // Close the kebab menu
+      closeCreatorMenu();
+
+      // Navigate back to home or profile
+      router.push("/");
+    }
+  } catch (error) {
+    console.error("Delete article error:", error);
+
+    // Handle different error scenarios
+    if (error.response?.status === 403) {
+      await Toast.fire({
+        icon: "error",
+        title: "Not authorized to delete this article",
+      });
+    } else if (error.response?.status === 404) {
+      await Toast.fire({
+        icon: "error",
+        title: "Article not found",
+      });
+    } else {
+      await Toast.fire({
+        icon: "error",
+        title: "Failed to delete article",
+      });
+    }
+  }
 }
 
 /* kebab menu behavior: toggle + close on outside click / ESC */
