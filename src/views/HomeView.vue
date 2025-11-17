@@ -105,8 +105,15 @@
               >
                 <div class="flex items-center">
                   <!-- Avatar initial -->
+                  <img
+                    v-if="article?.user?.image"
+                    :src="article.user.profile_image_url"
+                    :alt="`${article.user.username}'s avatar`"
+                    class="mr-3 w-8 h-8 rounded-full object-cover"
+                  />
                   <div
-                    class="mr-3 w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-white font-semibold"
+                    v-else
+                    class="mr-3 w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold"
                     aria-hidden="true"
                   >
                     {{
