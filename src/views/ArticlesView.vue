@@ -107,8 +107,9 @@
                   class="relative inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-sm text-gray-700 hover:bg-sky-50"
                   aria-label="Favorite"
                 >
-                  <!-- heart icon -->
+                  <!-- heart icon - filled when favorited, outlined when not -->
                   <svg
+                    v-if="isFavorite"
                     class="w-4 h-4 text-red-500"
                     viewBox="0 0 24 24"
                     fill="currentColor"
@@ -117,9 +118,19 @@
                       d="M12 21s-7-4.5-9-8a5 5 0 0110-2 5 5 0 0110 2c-2 3.5-9 8-9 8z"
                     />
                   </svg>
-                  <span class="text-sm">{{
-                    articlesData?.favorited_by_users_count ?? 0
-                  }}</span>
+                  <svg
+                    v-else
+                    class="w-4 h-4 text-gray-400"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      d="M12 21s-7-4.5-9-8a5 5 0 0110-2 5 5 0 0110 2c-2 3.5-9 8-9 8z"
+                    />
+                  </svg>
+                  <span class="text-sm">{{ favoriteCount }}</span>
                 </button>
               </div>
             </div>
@@ -357,6 +368,7 @@ const page = ref(0);
 
 const isFollowed = ref(false);
 const isFavorite = ref(false);
+const favoriteCount = ref(0);
 
 const creatorMenuOpen = ref(false);
 const kebabContainer = ref(null);
@@ -498,6 +510,7 @@ async function favoritePost() {
     );
     if (response.status === 200) {
       await checkIsFavorite();
+      await updateFavoriteCount();
     }
   } catch (error) {
     console.log(error);
@@ -511,6 +524,7 @@ async function unfavoritePost() {
     );
     if (response.status === 200) {
       await checkIsFavorite();
+      await updateFavoriteCount();
     }
   } catch (error) {
     console.log(error);
@@ -527,6 +541,18 @@ async function checkIsFavorite() {
     }
   } catch (error) {
     console.log(error);
+  }
+}
+
+async function updateFavoriteCount() {
+  try {
+    const slug = route.params.slug;
+    const response = await apiClient.get(`/articles/${slug}`);
+    if (response.status === 200 && response.data) {
+      favoriteCount.value = response.data.favorited_by_users_count ?? 0;
+    }
+  } catch (error) {
+    console.error(error);
   }
 }
 
@@ -731,6 +757,9 @@ onMounted(async () => {
   await getCommentsList();
   await checkIsFavorite();
   await checkIsFollowed();
+
+  // Initialize favorite count after article data is loaded
+  favoriteCount.value = articlesData.value?.favorited_by_users_count ?? 0;
 
   isLoading.value = false;
 
