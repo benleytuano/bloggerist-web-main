@@ -9,7 +9,7 @@
             <p class="mt-1 text-sm text-gray-600">
               Have an account?
               <RouterLink
-                to="/signin"
+                to="/login"
                 class="font-medium text-blue-600 hover:underline"
               >
                 Sign in

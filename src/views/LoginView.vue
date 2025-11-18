@@ -9,7 +9,7 @@
             <p class="mt-1 text-sm text-gray-600">
               Need an account?
               <RouterLink
-                to="/signup"
+                to="/register"
                 class="font-medium text-blue-600 hover:underline"
               >
                 Create one
